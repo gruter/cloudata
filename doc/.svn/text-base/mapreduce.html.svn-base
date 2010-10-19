@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><title>neptune</title>
+
+<style type="text/css" media="all">
+@import url("http://www.jaso.co.kr/neptune/css/maven-base.css");
+@import url("http://www.jaso.co.kr/neptune/css/maven-theme.css");
+@import url("http://www.jaso.co.kr/neptune/css/site.css");
+</style>
+<link rel="stylesheet" href="http://www.jaso.co.kr/neptune/css/print.css" type="text/css" media="print" />
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="SHORTCUT ICON" href="favicon.ico" />
+</head>
+<body class="composite">
+<div id="banner">
+<br />
+<a href="http://www.openneptune.com"><img alt="neptune_logo" src="http://www.jaso.co.kr/neptune/images/neptune.gif" /></a><br />
+</div>
+<div id="breadcrumbs">
+<div class="xleft"></div>
+<div class="xright"> </div>
+<div class="clear">
+<hr /> </div>
+</div>
+<div id="leftColumn">
+  <div id="navcolumn">
+    <h5>About</h5>
+      <ul>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/index.html">Overview</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/news.html">News</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/download.html">Downloads</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/faq.html">FAQ</a></li>
+        <li class="none"><a href="http://code.google.com/p/openneptune/issues/list" target="_blank">Issue Tracker</a></li>
+        <li class="none"> <a target="_blank" href="http://code.google.com/p/openneptune/w/list">Wiki</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/license.html">License</a></li>
+      </ul>
+    <h5>Documentation</h5>
+      <ul>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/getting_start.html">Getting started</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/install.html">Installation</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/simple_examples.html">Simple Examples</a></li>
+        <li class="none"><strong>MapReduce Example</strong></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/datamodel.html">Data model</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/components.html">Components</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/failover.html">Failover</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/javadoc_en/index.html">API</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/neptune_query.html">Query</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/performance.html">Performance</a></li>
+      </ul>
+    <h5>See also</h5>
+      <ul>
+        <li class="none"><a target="_blank" href="http://labs.google.com/papers/bigtable-osdi06.pdf">Google Bigtable</a></li>
+        <li class="none"><a target="_blank" href="http://hadoop.apache.org">Apache Hadoop</a></li>
+        <li class="none"><a target="_blank" href="http://dev.naver.com/projects/neptune">Site in Korean</a></li>
+      </ul>
+  </div>
+</div>
+<div id="bodyColumn">
+  <div id="contentBox">
+    <h2>MapReduce example</h2>
+      <div class="section">Neptune uses distributed/parallel computing platform to analyze the data stored in the neptune table. 
+        By default neptune uses Hadoop Map&amp;Reduce computing platform.<br />
+        You can use AbstractTabletInputFormat class as MapReduce's InputFormat. 
+        AbstractTabletInputFotmat has one abstract method. so you must implements this method.
+        <div class="source"><pre>
+public abstract AbstractTabletInputFormat implements InputFormat {
+  //return input table's detail info
+  public abstract InputTableInfo[] getInputTableInfos(JobConf jobConf);
+  ...
+}</pre>
+        </div>
+        You can define scan type by InputTableInfo.setRowScan(). If return true, map method is defined as
+        "public void map(Row.Key key, Row value, ...)". <br />
+        If false, map method is defined as "public void map(Row.Key key, ScanCell value, ...)". <br />
+        DefaultTabletInputFormat class is default implementation class of AbstractInputFormat.
+        To use DefaultTabletInputFormat class you must set following properties in JobConf.<br />
+        <ul>
+          <li>AbstractTabletInputFormat.INPUT_TABLE</li>
+          <li>AbstractTabletInputFormat.INPUT_COLUMN_LIST: ",&#8221; deliminator</li>
+        </ul>
+        To run MapReduce job with Neptune you must set classpath. There are several way. <BR>
+        The first approach is adding to HADOOP_CLASSPATH in a ${HADOOP_HOME}/conf/hadoop-env.sh next jar files or directory<BR>
+        ${NEPTUNE_HOME}/conf:${NEPTUNE_HOME}/neptune-1.0-dev.jar:${NEPTUNE_HOME}/lib/zookeeper-xxx.jar<BR>
+        This approach is simple, but you must restart hadoop cluster.<BR>
+        The second approach is to use <A href="http://hadoop.apache.org/core/docs/current/api/org/apache/hadoop/filecache/DistributedCache.html" target="_blank">DistributedCache</A>.
+        To use DistributedCache you must put jar files and xml files to HDFS before running job. NeptuneMapReduceUtil class helps uploading.
+        <div class="source"><pre>
+public class FirstMapReduce {
+  public void main(String[] args) throws Exception {
+    //Create Output Table
+    NConfiguration conf = new NConfiguration();
+    String tableName = "InvertedTable";
+    TableSchema tableSchema = new TableSchema();
+    tableSchema.addColumn("Column1");
+    if(!NTable.existsTable(conf, tableName)) {
+      NTable.createTable(conf, tableSchema);
+    }
+
+    JobConf jobConf = new JobConf(FirstMapReduce.class);
+    jobConf.setJobName("FirstMapReduce");
+
+    String libDir = NeptuneMapReduceUtil.initMapReduce(jobConf);    
+
+    //<Mapper>
+    jobConf.setMapperClass(FirstMapReduceMapper.class);
+    jobConf.setInputFormat(FirstMapReduceInputFormat.class);
+    jobConf.setMapOutputKeyClass(Text.class);
+    jobConf.setMapOutputValueClass(Text.class);
+    //</Mapper>
+
+    //<Reducer>
+    String outputPath = "temp/FirstMapReduce";
+    jobConf.setOutputPath(new Path(outputPath));
+    jobConf.setReducerClass(FirstMapReduceReducer.class);
+    jobConf.setOutputKeyClass(Text.class);
+    jobConf.setOutputValueClass(Text.class);
+    NTable ntable = NTable.openTable(conf, "SampleTable1");
+    TabletInfo[] tabletInfos = ntable.listTabletInfos();
+    jobConf.setNumReduceTasks(tabletInfos.length);
+    jobConf.setMaxReduceAttempts(0);
+    //</Reducer>
+
+    try {
+      JobClient.runJob(jobConf);
+    } finally {
+      NeptuneFileSystem fs = NeptuneFileSystem.get(new NConfiguration());
+      fs.delete(new GPath(outputPath), true);
+    
+      NeptuneMapReduceUtil.clearMapReduce(libDir);  
+    }
+  }
+
+  static class FirstMapReduceInputFormat 
+      extends AbstractTabletInputFormat {
+    public FirstMapReduceInputFormat() throws IOException {
+      super();
+    }
+
+    @Override
+    public InputTableInfo[] getInputTableInfos(JobConf jobConf) {
+      RowFilter rowFilter = new RowFilter();
+      rowFilter.addCellFilter(new CellFilter("Column1"));
+      
+      InputTableInfo inputTableInfo = new InputTableInfo();
+      inputTableInfo.setTable("SimpleTable", rowFilter);
+      
+      return new InputTableInfo[]{inputTableInfo};
+    }
+  }
+
+  static class FirstMapReduceMapper
+      implements Mapper<Row.Key, Row, Text, Text> {
+    @Override
+    public void map(Row.Key key, Row value, OutputCollector<Text, Text> output,
+        Reporter reporter) throws IOException {
+      for(Cell eachCell: value.getFirstColumnCells()) {
+        output.collect(new Text(eachCell.getKey().toString()), new Text(key.toString()));
+      }
+    }
+
+    @Override
+    public void configure(JobConf job) {
+    }
+
+    @Override
+    public void close() throws IOException {
+    }
+
+  }
+
+  static class FirstMapReduceReducer
+      implements Reducer<Text, Text, Text, Text> {
+    NTable ntable;
+    IOException exception;
+
+    @Override
+    public void reduce(Text key, Iterator<Text> values,
+        OutputCollector<Text, Text> output, Reporter reporter)
+        throws IOException {
+      if(exception != null) {
+        throw exception;
+      }
+      Row.Key rowKey = new Row.Key(key.toString());
+
+      Row row = new Row(rowKey);
+      while(values.hasNext()) {
+        Text text = values.next();
+        row.addCell("Column1",
+            new Cell(new Cell.Key(text.toString()), null));
+      }
+
+      ntable.put(row);
+    }
+
+    @Override
+    public void configure(JobConf job) {
+      try {
+        NConfiguration conf = new NConfiguration();
+        ntable = NTable.openTable(conf, "InvertedTable");
+        if(ntable == null) {
+          throw new IOException("No InvertedTable table");
+        }
+      } catch (IOException e) {
+        exception = e;
+      }
+    }
+
+    @Override
+    public void close() throws IOException {
+    }
+  }
+}</pre>
+        </div>
+      </div>
+<div class="clear">
+<hr /> </div>
+<div id="footer">
+  <div class="xright">Sponsored by <a target="_blank" href="http://www.nhnusainc.com/">NHN</a></div>
+</div>
+</div>
+</div>
+<script type="text/javascript"> 
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script> 
+<script type="text/javascript"> 
+var pageTracker = _gat._getTracker("UA-873630-2");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script> 
+</body></html>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="EUC-KR"?>
+<classes> 
+	<class id="minorCompactionAction" type="org.cloudata.core.tabletserver.action.MinorCompactionAction">
+	</class>
+	<class id="minorCompactionFinishAction" type="org.cloudata.core.tabletserver.action.MinorCompactionFinishAction">
+	</class>	
+	<class id="memorySSTable" type="org.cloudata.core.tabletserver.MemorySSTable">
+	</class>	
+	<class id="diskSSTable" type="org.cloudata.core.tabletserver.DiskSSTable">
+	</class>	
+	<class id="tabletServer" type="org.cloudata.core.tabletserver.TabletServer">
+	</class>	
+	<class id="masterServer" type="org.cloudata.core.master.CloudataMaster">
+	</class>	
+	<class id="tabletDropAction" type="org.cloudata.core.tabletserver.action.TabletDropAction">
+	</class>
+</classes>

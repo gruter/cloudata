@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><title>neptune</title>
+
+<style type="text/css" media="all">
+@import url("http://www.jaso.co.kr/neptune/css/maven-base.css");
+@import url("http://www.jaso.co.kr/neptune/css/maven-theme.css");
+@import url("http://www.jaso.co.kr/neptune/css/site.css");
+</style>
+<link rel="stylesheet" href="http://www.jaso.co.kr/neptune/css/print.css" type="text/css" media="print" />
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="SHORTCUT ICON" href="favicon.ico" /></head>
+<body class="composite">
+<div id="banner">
+<br />
+<a href="http://www.openneptune.com"><img alt="neptune_logo" src="http://www.jaso.co.kr/neptune/images/neptune.gif" /></a><br />
+</div>
+<div id="breadcrumbs">
+<div class="xleft"></div>
+<div class="xright"> </div>
+<div class="clear">
+<hr /> </div>
+</div>
+<div id="leftColumn">
+  <div id="navcolumn">
+    <h5>About</h5>
+      <ul>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/index.html">Overview</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/news.html">News</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/download.html">Downloads</a></li>
+        <li class="none"><strong>FAQ</strong></li>
+        <li class="none"><a href="http://code.google.com/p/openneptune/issues/list" target="_blank">Issue Tracker</a></li>
+        <li class="none"> <a target="_blank" href="http://code.google.com/p/openneptune/w/list">Wiki</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/license.html">License</a></li>
+      </ul>
+    <h5>Documentation</h5>
+      <ul>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/getting_start.html">Getting started</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/install.html">Installation</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/simple_examples.html">Simple Examples</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/mapreduce.html">MapReduce Example</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/datamodel.html">Data model</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/components.html">Components</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/failover.html">Failover</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/javadoc_en/index.html">API</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/neptune_query.html">Query</a></li>
+        <li class="none"><a href="http://www.jaso.co.kr/neptune/performance.html">Performance</a></li>
+      </ul>
+    <h5>See also</h5>
+      <ul>
+        <li class="none"><a target="_blank" href="http://labs.google.com/papers/bigtable-osdi06.pdf">Google Bigtable</a></li>
+        <li class="none"><a target="_blank" href="http://hadoop.apache.org">Apache Hadoop</a></li>
+        <li class="none"><a target="_blank" href="http://dev.naver.com/projects/neptune">Site in Korean</a></li>
+      </ul>
+  </div>
+</div>
+<div id="bodyColumn">
+  <div id="contentBox">
+    <h2>FAQ</h2>
+    <div class="section">
+      <h3>What is neptune?</h3>
+      Neptune is structured data storage. It's DBMS(Database Management System), but not Relational DBMS.
+    </div>
+
+    <div class="section">
+      <h3>How Neptune is different from Hadoop Fils System.</h3>
+      File system like Hadoop can store flat file. It is impossible to retrieve a specified record within milliseconds in a flat file.<br/>
+      "Structured" means indexed. RDBMS like Oracle is most popular structured data storage.<br/>
+      You can store structured(indexed) data in the Neptune and can retrieve within a few milliseconds. <br/>
+    </div>
+
+    <div class="section">
+      <h3>How fast online operation?</h3>
+      Neptune is not optimized for online operation. But supports resonable speed.<br>
+      On average workload status, You can put a row(1000 bytes) within 0.5 ~ 5 ms and can get within 1 ~ 5 ms.<br>
+      Look <a href="http://www.jaso.co.kr/neptune/performance.html">performance test results.</a>
+    </div>
+  </div>
+</div>
+<div class="clear">
+<hr /> </div>
+<div id="footer">
+  <div class="xright">Sponsored by <a target="_blank" href="http://www.nhnusainc.com/">NHN</a></div>
+</div>
+<script type="text/javascript"> 
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script> 
+<script type="text/javascript"> 
+var pageTracker = _gat._getTracker("UA-873630-2");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script> 
+</body></html>

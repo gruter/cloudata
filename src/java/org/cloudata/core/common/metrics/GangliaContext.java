@@ -1,0 +1,270 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.cloudata.core.common.metrics;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.SocketException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.metrics.MetricsException;
+
+/**
+ * Context for sending metrics to Ganglia.
+ * copy from Hadoop
+ * 
+ */
+public class GangliaContext extends CloudataMetricsContext {
+    
+  protected static final String PERIOD_PROPERTY = "period";
+  protected static final String SERVERS_PROPERTY = "servers";
+  protected static final String UNITS_PROPERTY = "units";
+  protected static final String SLOPE_PROPERTY = "slope";
+  protected static final String TMAX_PROPERTY = "tmax";
+  protected static final String DMAX_PROPERTY = "dmax";
+    
+  protected static final String DEFAULT_UNITS = "";
+  protected static final String DEFAULT_SLOPE = "both";
+  protected static final int DEFAULT_TMAX = 60;
+  protected static final int DEFAULT_DMAX = 0;
+  protected static final int DEFAULT_PORT = 8649;
+  protected static final int BUFFER_SIZE = 1500;       // as per libgmond.c
+
+  protected static final Log LOG = LogFactory.getLog(GangliaContext.class);    
+
+  protected static final Map<Class,String> typeTable = new HashMap<Class,String>(5);
+    
+  static {
+    typeTable.put(String.class, "string");
+    typeTable.put(Byte.class, "int8");
+    typeTable.put(Short.class, "int16");
+    typeTable.put(Integer.class, "int32");
+    typeTable.put(Long.class, "float");
+    typeTable.put(Float.class, "float");
+  }
+    
+  protected byte[] buffer = new byte[BUFFER_SIZE];
+  protected int offset;
+    
+  protected List<? extends SocketAddress> metricsServers;
+  protected Map<String,String> unitsTable;
+  protected Map<String,String> slopeTable;
+  protected Map<String,String> tmaxTable;
+  protected Map<String,String> dmaxTable;
+    
+  protected DatagramSocket datagramSocket;
+  
+  /** Creates a new instance of GangliaContext */
+  public synchronized void startMonitoring() {
+    CloudataMetricsFactory factory = CloudataMetricsFactory.getFactory();
+    String periodStr = factory.getAttribute(contextName + "." + PERIOD_PROPERTY);
+    if (periodStr != null) {
+      int period = 0;
+      try {
+        period = Integer.parseInt(periodStr);
+      } catch (NumberFormatException nfe) {
+      }
+      if (period <= 0) {
+        throw new MetricsException("Invalid period: " + periodStr);
+      }
+      setPeriod(period);
+    }
+        
+    metricsServers = 
+      parse(factory.getAttribute(contextName + "." + SERVERS_PROPERTY), DEFAULT_PORT); 
+        
+    unitsTable = getAttributeTable(factory, UNITS_PROPERTY);
+    slopeTable = getAttributeTable(factory, SLOPE_PROPERTY);
+    tmaxTable  = getAttributeTable(factory, TMAX_PROPERTY);
+    dmaxTable  = getAttributeTable(factory, DMAX_PROPERTY);
+        
+    try {
+      datagramSocket = new DatagramSocket();
+    }
+    catch (SocketException se) {
+      se.printStackTrace();
+    }
+    
+    super.startMonitoring();
+  }
+        
+  @Override
+  protected boolean isMonitoring() {
+    return true;
+  }
+  
+  @Override
+  protected void flush() {
+  }
+  
+  protected Map<String,String> getAttributeTable(CloudataMetricsFactory factory, String tableName) {
+    String prefix = contextName + "." + tableName + ".";
+    Map<String,String> result = new HashMap<String,String>();
+    for (String attributeName : factory.getAttributeNames()) {
+      if (attributeName.startsWith(prefix)) {
+        String name = attributeName.substring(prefix.length());
+        String value = (String) factory.getAttribute(attributeName);
+        result.put(name, value);
+      }
+    }
+    return result;
+  }
+  
+  @Override
+  protected void emitRecords(String contextName, List<MetricsValue> metricsValues) {
+    // emit each metric in turn
+    for (MetricsValue metricsValue : metricsValues) {
+      String name = contextName + "." + metricsValue.getKey();
+      Object value = metricsValue.getValue();
+      String type = typeTable.get(value.getClass());
+      if (type != null) {
+        try {
+          emitMetric(name, type, value.toString());
+        } catch (IOException e) {
+          LOG.warn("Metrics Error: " + name + "," + type + "," + value);
+        }
+      } else {
+        LOG.warn("Unknown metrics type: " + value.getClass());
+      }
+    }
+  }
+    
+  protected void emitMetric(String name, String type,  String value) 
+    throws IOException
+  {
+    String units = getUnits(name);
+    int slope = getSlope(name);
+    int tmax = getTmax(name);
+    int dmax = getDmax(name);
+        
+    offset = 0;
+    xdr_int(0);             // metric_user_defined
+    xdr_string(type);
+    xdr_string(name);
+    xdr_string(value);
+    xdr_string(units);
+    xdr_int(slope);
+    xdr_int(tmax);
+    xdr_int(dmax);
+        
+    for (SocketAddress socketAddress : metricsServers) {
+      DatagramPacket packet = 
+        new DatagramPacket(buffer, offset, socketAddress);
+      datagramSocket.send(packet);
+    }
+  }
+    
+  protected String getUnits(String metricName) {
+    String result = unitsTable.get(metricName);
+    if (result == null) {
+      result = DEFAULT_UNITS;
+    }
+    return result;
+  }
+    
+  protected int getSlope(String metricName) {
+    String slopeString = slopeTable.get(metricName);
+    if (slopeString == null) {
+      slopeString = DEFAULT_SLOPE; 
+    }
+    return ("zero".equals(slopeString) ? 0 : 3); // see gmetric.c
+  }
+    
+  protected int getTmax(String metricName) {
+    String tmaxString = tmaxTable.get(metricName);
+    if (tmaxString == null) {
+      return DEFAULT_TMAX;
+    }
+    else {
+      return Integer.parseInt(tmaxString);
+    }
+  }
+    
+  protected int getDmax(String metricName) {
+    String dmaxString = dmaxTable.get(metricName);
+    if (dmaxString == null) {
+      return DEFAULT_DMAX;
+    }
+    else {
+      return Integer.parseInt(dmaxString);
+    }
+  }
+    
+  /**
+   * Puts a string into the buffer by first writing the size of the string
+   * as an int, followed by the bytes of the string, padded if necessary to
+   * a multiple of 4.
+   */
+  protected void xdr_string(String s) {
+    byte[] bytes = s.getBytes();
+    int len = bytes.length;
+    xdr_int(len);
+    System.arraycopy(bytes, 0, buffer, offset, len);
+    offset += len;
+    pad();
+  }
+
+  /**
+   * Pads the buffer with zero bytes up to the nearest multiple of 4.
+   */
+  protected void pad() {
+    int newOffset = ((offset + 3) / 4) * 4;
+    while (offset < newOffset) {
+      buffer[offset++] = 0;
+    }
+  }
+        
+  /**
+   * Puts an integer into the buffer as 4 bytes, big-endian.
+   */
+  protected void xdr_int(int i) {
+    buffer[offset++] = (byte)((i >> 24) & 0xff);
+    buffer[offset++] = (byte)((i >> 16) & 0xff);
+    buffer[offset++] = (byte)((i >> 8) & 0xff);
+    buffer[offset++] = (byte)(i & 0xff);
+  }
+    
+  protected List<InetSocketAddress> parse(String specs, int defaultPort) {
+    List<InetSocketAddress> result = new ArrayList<InetSocketAddress>(1);
+    if (specs == null) {
+      result.add(new InetSocketAddress("localhost", defaultPort));
+    }
+    else {
+      String[] specStrings = specs.split("[ ,]+");
+      for (String specString : specStrings) {
+        int colon = specString.indexOf(':');
+        if (colon < 0 || colon == specString.length() - 1) {
+          result.add(new InetSocketAddress(specString, defaultPort));
+        } else {
+          String hostname = specString.substring(0, colon);
+          int port = Integer.parseInt(specString.substring(colon+1));
+          result.add(new InetSocketAddress(hostname, port));
+        }
+      }
+    }
+    return result;
+  }
+}

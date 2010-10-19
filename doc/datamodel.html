@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><title>cloudata</title>
+
+<style type="text/css" media="all">
+@import url("css/maven-base.css");
+@import url("css/maven-theme.css");
+@import url("css/site.css");
+</style>
+<link rel="stylesheet" href="css/print.css" type="text/css" media="print" />
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="SHORTCUT ICON" href="favicon.ico" />
+</head>
+<body class="composite">
+<div id="banner">
+<br />
+<a href="http://www.cloudata.org"><img alt="cloudata_logo" src="images/cloudata.gif" /></a><br />
+</div>
+<div id="breadcrumbs">
+<div class="xleft"></div>
+<div class="xright"> </div>
+<div class="clear">
+<hr /> </div>
+</div>
+<div id="leftColumn">
+  <div id="navcolumn">
+    <h5>About</h5>
+      <ul>
+        <li class="none"><a href="index.html">Overview</a></li>
+        <li class="none"><a href="news.html">News</a></li>
+        <li class="none"><a href="download.html">Downloads</a></li>
+        <li class="none"><a href="faq.html">FAQ</a></li>
+        <li class="none"><a href="license.html">License</a></li>
+      </ul>
+    <h5>Documentation</h5>
+      <ul>
+        <li class="none"><a href="getting_start.html">Getting started</a></li>
+        <li class="none"><a href="install.html">Installation</a></li>
+        <li class="none"><a href="simple_examples.html">Simple Examples</a></li>
+        <li class="none"><a href="mapreduce.html">MapReduce Example</a></li>
+        <li class="none"><strong>Data model</strong></li>
+        <li class="none"><a href="components.html">Components</a></li>
+        <li class="none"><a href="javadoc/index.html">API</a></li>
+        <li class="none"><a href="cloudata_query.html">Query</a></li>
+        <li class="none"><a href="performance.html">Performance</a></li>
+      </ul>
+    <h5>See also</h5>
+      <ul>
+        <li class="none"><a target="_blank" href="http://labs.google.com/papers/bigtable-osdi06.pdf">Google Bigtable</a></li>
+        <li class="none"><a target="_blank" href="http://hadoop.apache.org">Apache Hadoop</a></li>
+      </ul>
+  </div>
+</div>
+<div id="bodyColumn">
+<div id="contentBox">
+<h2>Cloudata's Data Model</h2>
+<div class="section">
+Cloudata is a sparse, distributed, persistent multidimensional sorted
+map(from Bigtable's data model). <br />
+<br />
+<img alt="cloudata data model" src="images/cloudata_datamodel.gif" />
+<ul>
+<li>Table:&nbsp;All datas are stored in logical data
+storage called "Table". Table is identified by table name and a table
+name must be unique in a cloudata cluster. </li>
+<li>Column: A table has multiple columns. A columns has same
+meaning RDBMS's column. Column must be defined when table is created or
+can be added with "add column" instrunction.</li>
+<li>Row: A table consists of numerous rows.&nbsp;</li>
+<li>Row.Key: Each row has unique identifier,
+"rowkey".&nbsp; Cloudata automatically creates rowkey, while user
+explicitly specifies row key column in a relational database. Data is
+sorted by Row.Key. Row-Key is String type.</li>
+<li>Cell: Cell is a intersection of row and column. Cell can
+have many&nbsp;key-value pairs(Cell.Key-Cell,Value).<strong> </strong></li>
+<li>Cell.Key: Datas in a cell identified by Cell.Key and sored
+by Cell.Key. Cell.Key is String type.</li>
+<li>Cell.Value: A Cell.Value has&nbsp;multiple versions and
+sorted by timestamp in descending order. Each version stores byte
+array.&nbsp;</li>
+</ul>
+<div style="margin-left: 40px;"><span style="font-weight: bold;"><img style="width: 500px; height: 187px;" alt="row cell" src="images/cloudata_row_cell.gif" /></span></div>
+</div>
+</div>
+</div>
+<div class="clear">
+<hr /> </div>
+<div id="footer">
+  <div class="xright">Sponsored by <a target="_blank" href="http://www.gruter.com/">Gruter</a></div>
+</div>
+<script type="text/javascript"> 
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script> 
+<script type="text/javascript"> 
+var pageTracker = _gat._getTracker("UA-873630-2");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script> 
+</body></html>

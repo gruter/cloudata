@@ -1,0 +1,20 @@
+package $packageName;
+import static java.lang.Math.*;
+import java.io.*;
+import java.util.*;
+import org.cloudata.core.client.procedure.*;
+import org.cloudata.core.client.*;
+import org.cloudata.core.tablet.*;
+import org.cloudata.core.tabletserver.*;
+
+public class $className
+	   implements org.cloudata.core.client.procedure.NScript {
+
+   public void execute() throws NScriptException {
+	   try {
+      $expression
+     } catch (Exception e) {
+			 throw new NScriptException(e);
+     }
+   }
+}

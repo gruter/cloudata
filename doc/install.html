@@ -1,0 +1,335 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><title>cloudata</title>
+
+<style type="text/css" media="all">
+@import url("css/maven-base.css");
+@import url("css/maven-theme.css");
+@import url("css/site.css");
+</style>
+<link rel="stylesheet" href="css/print.css" type="text/css" media="print" />
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="SHORTCUT ICON" href="favicon.ico" />
+</head>
+<body class="composite">
+<div id="banner">
+<br />
+<a href="http://www.opencloudata.com"><img alt="cloudata_logo" src="images/cloudata.gif" /></a><br />
+</div>
+<div id="breadcrumbs">
+<div class="xleft"></div>
+<div class="xright"> </div>
+<div class="clear">
+<hr /> </div>
+</div>
+<div id="leftColumn">
+  <div id="navcolumn">
+    <h5>About</h5>
+      <ul>
+        <li class="none"><a href="index.html">Overview</a></li>
+        <li class="none"><a href="news.html">News</a></li>
+        <li class="none"><a href="download.html">Downloads</a></li>
+        <li class="none"><a href="faq.html">FAQ</a></li>
+        <li class="none"><a href="license.html">License</a></li>
+      </ul>
+    <h5>Documentation</h5>
+      <ul>
+        <li class="none"><a href="getting_start.html">Getting started</a></li>
+        <li class="none"><strong>Installation</strong></li>
+        <li class="none"><a href="simple_examples.html">Simple Examples</a></li>
+        <li class="none"><a href="mapreduce.html">MapReduce Example</a></li>
+        <li class="none"><a href="datamodel.html">Data model</a></li>
+        <li class="none"><a href="components.html">Components</a></li>
+        <li class="none"><a href="javadoc/index.html">API</a></li>
+        <li class="none"><a href="cloudata_query.html">Query</a></li>
+        <li class="none"><a href="performance.html">Performance</a></li>
+      </ul>
+    <h5>See also</h5>
+      <ul>
+        <li class="none"><a target="_blank" href="http://labs.google.com/papers/bigtable-osdi06.pdf">Google Bigtable</a></li>
+        <li class="none"><a target="_blank" href="http://hadoop.apache.org">Apache Hadoop</a></li>
+      </ul>
+  </div>
+</div>
+<div id="bodyColumn">
+  <div id="contentBox">
+    <div class="section">
+      <p>In this section, you can run cloudata on multiple machines(Linux).
+    </div>
+    <h2>System Requirements</h2>
+    <div class="section">
+      <p>In order to run or compile cloudata you need to have following software already installed on your system<br/></p>
+      <ul>
+        <li>Operating System: Linux</li>
+        <li>Machine: more than three</li>
+        <li>Java Virtual Machine: JDK6 or higher</li>
+        <li>File system: Hadoop 0.17 or higher, other all file systems which can implement CloudataFileSystem interface.&nbsp;</li>
+        <li>JavaCC: https://javacc.dev.java.net/</li>
+        <li>Ant: http://ant.apache.org/</li>
+        <li>Zookeeper: http://hadoop.apache.org/zookeeper/</li>
+      </ul>
+    </div>
+<hr/> 
+    <h2>Server configuration</h2>
+    <div class="section">
+      <h3>time sync.</h3>
+      All nodes in cloudata cluster must have same time.<br />
+      <div class="source"><pre>
+[root@master] crontab -e&nbsp; (add time sync cron job)
+0 4 * * * rdate -s&nbsp;<span style="font-style: italic;">time server</span> &amp;&amp; hwclock -w</pre>
+      </div>
+      <h3>increase "open files" parameter</h3>
+      On linux system, there is a limit set in the kernel on how many open
+      file descriptors are allowed on the system. Default value is 1024.<br />
+      Cloudata openes many sockets. In java program, a socket is needed 2 file
+      descriptors, so you must increase "open files" parameter.<br />
+      <div class="source"><pre>
+[root@master] ulimit -a
+core file size (blocks) unlimited
+data seg size (kbytes) unlimited
+file size (blocks) unlimited
+max locked memory (kbytes) unlimited
+max memory size (kbytes) unlimited
+<span style="color: red;">open files 1024</span>
+pipe size (512 bytes) 8
+stack size (kbytes) unlimited
+cpu time (seconds) unlimited
+max user processes 4095
+virtual memory (kbytes) unlimited
+
+[root@master] vi /etc/security/limits.conf  (add next tow lines)
+cloudata_admin_id   soft   nofile     10240
+cloudata_admin_id   hard   nofile     10240</pre>
+      </div>
+
+      <h3>configure SSH</h3>
+      Cloudata requires SSH access to manage its nodes. you have SSH up and
+      running on your machine and configured it to allow SSH public key
+      authentication.<br />
+      <br />
+      <span style="font-weight: bold;">generate ssh key</span><br />
+      <div class="source"><pre>
+[cloudata@master] ssh-keygen -t rsa (Use empty responses for each prompt)
+  Enter passphrase (empty for no passphrase):
+  Enter same passphrase again:
+  Your identification has been saved in
+  /home/cloudata/.ssh/id_rsa.<br />
+  Your public key has been saved in
+  /home/cloudata/.ssh/id_rsa.pub.<br />
+  The key fingerprint
+  is:||||a6:5c:c3:eb:18:94:0b:06:a1:a6:29:58:fa:80:0a:bc cloudata@localhost</pre>
+      </div>
+      
+      <span style="font-weight: bold;">copy ssh key to all nodes</span><br />
+      <br />
+      [cloudata]scp /home/cloudata/.ssh/id_rsa.pub<br />
+      cloudata@devcluster01:/home/cloudata/.ssh/authorized_keys<br />
+    </div>
+<hr/> 
+    <h2>Download</h2>
+    <div class="section">
+      <ul>
+        <li><span style="font-weight: bold;">Release Versions</span>: can be found here&nbsp;<a href="download.html">http://www.opencloudata.com/download.html</a></li>
+        <li><span style="font-weight: bold;">Subversion</span>: can get the latest with subversion<br />
+        svn checkout --username anonsvn https://dev.naver.com/svn/cloudata<br />
+        The password is 'anonsvn'<br />
+        </li>
+      </ul>
+    </div>
+<hr/>     
+    <h2>Configure Cloudata</h2>
+    <div class="section">
+      <h3>${CLOUDATA_HOME}/conf/cloudata-site.xml </h3>
+      <div class="source"><pre>
+&lt;?xml version=&quot;1.0&quot;?&gt;
+&lt;configuration&gt;
+    &lt;property&gt;
+        &lt;name&gt;cloudata.root&lt;/name&gt;
+        &lt;value&gt;/user/cloudata&lt;/value&gt;
+        &lt;description&gt;root path for data file in DFS(Hadoop)&lt;/description&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+      &lt;name&gt;cloudata.local.temp&lt;/name&gt;
+      &lt;value&gt;/home/user_home/tmp/cloudata-${user.name}&lt;/value&gt;
+      &lt;description&gt;A base for other temporary directories.&lt;/description&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+      &lt;name&gt;changelog.data.dir&lt;/name&gt;
+      &lt;value&gt;$USER_HOME$/changelog/&lt;/value&gt;
+      &lt;description&gt;path where change logs are stored. local machine&lt;/description&gt;
+    &lt;/property&gt;      
+    &lt;property&gt;
+      &lt;name&gt;changelog.image.dir&lt;/name&gt;
+      &lt;value&gt;/user/cloudata/data/changelog/image&lt;/value&gt;
+      &lt;description&gt;dfs dir&lt;/description&gt;
+    &lt;/property&gt;   
+    &lt;property&gt;
+      &lt;name&gt;cloudata.cluster.zkservers&lt;/name&gt;
+      &lt;value&gt;zookeeper_hostname:2181&lt;/value&gt;
+      &lt;description&gt;zookeeper server hostname(comma separator)&lt;/description&gt;
+    &lt;/property&gt;     
+&lt;/configuration&gt;</pre>
+      </div>
+      Most configuration variable is directory for data directory on
+      distributed file system or local temporary directory and zookeeper servers.
+      <br />
+      <br />
+      
+      <h3>${CLOUDATA_HOME}/conf/slaves</h3>
+      <div class="source">
+        tabletserver_host01<br />
+        tabletserver_host02<br />
+        tabletserver_host03<br />
+      </div>
+
+      <h3>${CLOUDATA_HOME}/conf/changelog_servers</h3>
+      <div class="source">
+        changelogserver_host01<br />
+        changelogserver_host02<br />
+        changelogserver_host03<br />
+      </div>      
+
+      <h3>${CLOUDATA_HOME}/conf/cloudata-env.sh</h3>
+      <div class="source"><pre>
+# Set Cloudata-specific environment variables here.
+# JAVA_HOME, CLOUDATA_HOME, HADOOP_HOME required
+
+heapsize() {
+  echo " -Xms$1""m"" -Xmx$2""m "
+}
+
+#JAVA HOME dir
+export JAVA_HOME=/usr/java/jdk1.6.0_06
+
+#Cloudata home dir
+export CLOUDATA_HOME=/home/cloudata
+
+#Cloudata conf dis
+export CLOUDATA_CONF_DIR="${CLOUDATA_HOME}/conf"
+
+# JVM Heap Size (MB) of each Cloudata component
+export CLOUDATA_MASTER_HEAPSIZE=`heapsize 512 1024`
+export CLOUDATA_TABLETSERVER_HEAPSIZE=`heapsize 2048 2048`
+export CLOUDATA_CHANGELOGSERVER_HEAPSIZE=`heapsize 512 512`
+
+# TABLET_SERVER JMX Socket Port
+export TABLETSERVER_JMX_PORT=58004
+
+# Extra Java CLASSPATH elements.  Optional.
+#export CLOUDATA_CLASSPATH=
+
+# The directory where pid files are stored. /tmp by default.
+export CLOUDATA_PID_DIR=~/.cloudata_pids
+
+# A string representing this instance of cloudata. $USER by default.
+# export CLOUDATA_IDENT_STRING=$USER
+
+#ZooKeeper dir
+#set cloudata home dir
+export ZOOKEEPER_HOME=/home/cloudata
+export ZOOKEEPER_CONF=${ZOOKEEPER_HOME}/conf/zoo.cfg
+
+# Hadoop Home dir
+export HADOOP_HOME=/home/hadoop
+
+# Hadoop Conf dir
+export HADOOP_CONF_DIR="${HADOOP_HOME}/conf"
+
+# JVM Options of each Cloudata component
+export CLOUDATA_MASTERNODE_OPTS="$CLOUDATA_MASTER_HEAPSIZE -Dcom.sun.management.jmxremote"
+export CLOUDATA_TABLETSERVER_OPTS="-XX:+UseConcMarkSweepGC -XX:+ExplicitGCInvokesConcurrent -XX:+CMSClassUnloadingEnabled -XX:CMSInitiatingOccupancyFraction=50 -server -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=$TABLETSERVER_JMX_PORT $CLOUDATA_TABLETSERVER_HEAPSIZE"
+export CLOUDATA_CHANGELOG_OPTS="-XX:+UseConcMarkSweepGC -XX:+ExplicitGCInvokesConcurrent -XX:+CMSClassUnloadingEnabled -XX:CMSInitiatingOccupancyFraction=50 -server $CLOUDATA_CHANGELOGSERVER_HEAPSIZE"
+</pre>
+      </div>
+    </div>
+<hr/>    
+    <h2>Configure zookeeper</h2>
+    <div class="section">
+      Zookeeper is distributed coordinating service. It's like goolge's chubby.
+      Cloudata uses zookeeper for master election, TabletServer failover, etc. <br />
+      If you have already zookeeper service, set ZOOKEEPER_HOME and ZOOKEEPER_CONF variable in conf/cloudata-env.sh.
+      And If not use shared zookeeper service(use dedicated zookeeper serivce
+      for cloudata), config CLOUDATA_HOME/conf/zoo.cfg</h3>
+      <div class="source"><pre>
+# The number of milliseconds of each tick
+tickTime=2000
+# The number of ticks that the initial 
+# synchronization phase can take
+initLimit=10
+# The number of ticks that can pass between 
+# sending a request and getting an acknowledgement
+syncLimit=5
+# the directory where the snapshot is stored.
+dataDir=/home/cloudata/zookeeper/data
+# the port at which the clients will connect
+clientPort=2181      
+			</pre>
+      </div>
+    </div>
+<hr/>    
+    <h2>Deploy to all nodes</h2>
+    <div class="section">
+      Copy ${CLOUDATA_HOME}/conf, ${CLOUDATA_HOME}/lib, ${CLOUDATA_HOME}/bin, ${CLOUDATA_HOME}/cloudata*.jar to all nodes. 
+      <div class="source"><pre>
+[cloudata@master]chmod 755 ./bin/*       
+[cloudata@master]chmod 755 ./conf/*.sh
+[cloudata@master]tar cvf cloudata.tar conf lib bin cloudata*.jar
+[cloudata@master]scp cloudata.tar tabletserver_host01:/home/cloudata/cloudata.tar
+[cloudata@master]scp cloudata.tar tabletserver_host02:/home/cloudata/cloudata.tar
+...
+[cloudata@master]ssh tabletserver_host01
+[cloudata@tabletserver_host01]tar xf cloudata.tar
+[cloudata@tabletserver_host01]exit
+...
+[cloudata@master]ssh tabletserver_host02
+[cloudata@tabletserver_host02]tar xf cloudata.tar</pre>
+      </div>
+    </div>
+<hr/>
+    <h2>Start/Stop</h2>
+    <div class="section">
+      When cloudata starts up, several daemons start in the following order
+      <ul>
+        <li>zookeeper server on master node(or other nodes for failover)</li> 
+        <li>ChangeLogserver on slave nodes</li> 
+        <li>CloudataMaster on master(or other nodes for failover)</li> 
+        <li>TabletServer on on slave nodes</li> 
+      </ul>        
+      Run ${CLOUDATA_HOME}/bin/zookeeper-start.sh to start zookeeper server
+			<div class="source"><pre>[cloudata@master]./bin/zookeeper-start.sh
+			</pre>
+      </div>
+      Run ${CLOUDATA_HOME}/bin/start.sh to start cloudata cluster and run ${CLOUDATA_HOME}/bin/stop.sh to stop cloudata cluster      
+      <div class="source"><pre>
+#start cluster
+[cloudata@master]./bin/start.sh
+
+#format and start cluster 
+[cloudata@master]./bin/start.sh -format
+
+#stop cluster
+[cloudata@master]./bin/stop.sh</pre>
+      </div>
+      You can check server status this url "http://cloudata_master:57000". Also you can see server logs in ${CLOUDATA_HOME}/logs directory.<br/>
+      Not to run entire cluster but to run CloudataMaster or TabletServer on a particular node, the following command is used.
+      <div class="source"><pre>
+#Run CloudataMaster
+[cloudata@master]./bin/cloudata-daemon.sh start cloudatamaster
+
+#Run TabletServer
+[cloudata@tabletserver_host01]./bin/cloudata-daemon.sh start tabletserver</pre>
+      </div>
+    </div>    
+  </div>
+<div id="footer">
+  <div class="xright">Sponsored by <a target="_blank" href="http://www.gruter.com/">Gruter</a></div>
+</div>
+<script type="text/javascript"> 
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script> 
+<script type="text/javascript"> 
+var pageTracker = _gat._getTracker("UA-873630-2");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script> 
+</body></html>

@@ -1,0 +1,4 @@
+org.cloudata.core.client
+org.cloudata.core.client.scanner
+org.cloudata.core.parallel.hadoop
+org.cloudata.core.tablet

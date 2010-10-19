@@ -1,0 +1,646 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+options
+{
+  STATIC = false;
+  IGNORE_CASE = true;
+}
+
+PARSER_BEGIN(CqlParser)
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.cloudata.core.client.cql.javacc;
+ 
+import java.io.*;
+import java.util.*;
+import org.cloudata.core.tablet.*;
+import org.cloudata.core.client.*;
+import org.cloudata.core.client.cql.*;
+import org.cloudata.core.client.cql.statement.*;
+import org.cloudata.core.client.cql.element.*;
+ 
+public class CqlParser {
+  public CqlParser(String query) {
+    this(new StringReader(query));
+  }
+}
+
+PARSER_END(CqlParser)
+
+SKIP :
+{
+    " "
+  | "\r"
+  | "\t"
+  | "\n"
+}
+
+//Create, Drop
+TOKEN:
+{
+    <CREATE: "CREATE">
+  | <TABLE: "TABLE">
+  | <VERSION: "VERSION">
+  | <COMMENT: "COMMENT">
+  | <DROP: "DROP">
+}
+
+//Select
+TOKEN: 
+{
+    <SELECT: "SELECT">
+  | <FROM: "FROM">
+  | <INTO: "INTO">
+  | <WHERE: "WHERE">
+  | <LIKE: "LIKE">
+  | <BETWEEN: "BETWEEN">
+  | <IN: "IN">
+  | <AND: "AND">
+  | <OR: "OR">
+  | <NOT: "NOT">
+  | <TIMESTAMP: "TIMESTAMP">
+}
+
+//Insert, Delete
+TOKEN:
+{
+    <INSERT: "INSERT">
+  | <VALUES: "VALUES">
+  | <DELETE: "DELETE">
+}
+
+//Etc
+TOKEN:
+{
+    <ADD: "ADD">
+  | <USER: "USER">
+}
+
+TOKEN:
+{
+    <COMMA: ",">
+  | <DOT: ".">
+  | <STAR: "*">
+  | <LEFT_PAREN: "(">
+  | <RIGHT_PAREN: ")">
+  | <EQ: "=">
+  | <GT: ">">
+  | <LT: "<">
+  | <GT_EQ: ">=">
+  | <LT_EQ: "<=">
+} 
+
+TOKEN:
+{
+    <REAL_NUM: (<INT_NUM>)? "." <INT_NUM> (["e", "E"] (["-","+"])? <INT_NUM>)?>
+  | <INT_NUM: ( <DIGIT> )+ >
+  | <#DIGIT: ["0" - "9"]>
+}
+
+TOKEN: 
+{
+    <IDENTIFIER: (<LETTER> | "_" )+ ( <DIGIT> | <LETTER> | "_" )* >
+  | <#LETTER: ["a"-"z", "A"-"Z"]>
+  | <STRING_LITERAL: "'" (~["'"])* "'" ("'" (~["'"])* "'")*>
+}
+
+QueryStatement parseStmt() : 
+{
+  QueryStatement statement;
+}
+{
+  (
+    statement= select()
+    | statement = createTable()
+    | statement = drop()
+    | statement = insert()
+    | statement = delete()
+  )
+  { 
+    return statement; 
+  }
+}
+
+CreateTableStatement createTable( ):
+{
+  Token tk;
+  String tmp;
+  TableSchema table = new TableSchema( );
+  CreateTableStatement stmt = new CreateTableStatement( );
+}
+{
+  <CREATE> <TABLE> tk = <IDENTIFIER>
+  {
+    table.setTableName( tk.image);
+  }
+  <LEFT_PAREN>
+    tk = <IDENTIFIER> 
+    {
+      table.addColumn(tk.image);
+    }
+    ( 
+      <COMMA> 
+      tk = <IDENTIFIER>  
+      {
+        table.addColumn(tk.image);
+      }
+    )*
+  <RIGHT_PAREN>
+  [
+    <VERSION> <EQ> tk = <INT_NUM>
+    {
+      table.setNumOfVersion(Integer.parseInt(tk.image));
+    }
+  ]
+  [ 
+    <COMMENT> <EQ> tk = <STRING_LITERAL> 
+    {
+      tmp = tk.image;
+      table.setDescription(tmp.substring( 1, tmp.length( ) -1));
+    }
+  ]
+  {
+    stmt.setTable(table);
+    return stmt;
+  }
+}
+
+DropStatement drop():
+{
+  Token tk;
+  DropStatement drop = new DropStatement( );
+}
+{
+  <DROP> <TABLE> tk = <IDENTIFIER>
+  {
+    drop.setTableName(tk.image);
+    return drop;
+  }
+}
+
+InsertStatement insert( ):
+{
+  Token tk;
+  Token value;
+  String tmp;
+  List<ColumnElement> columns;
+  List<String[]> columnValues;
+  InsertStatement insert = new InsertStatement();
+}
+{
+  <INSERT> <INTO> tk = <IDENTIFIER> 
+  {
+    insert.setTableName(tk.image);
+  }
+  [ 
+    <LEFT_PAREN>
+    columns = selectCols() 
+    {
+      insert.setColumns(columns);
+    }
+    <RIGHT_PAREN>
+  ]
+  <VALUES> 
+  <LEFT_PAREN>
+  {
+    columnValues = columnValues();
+    insert.setColumnValues(columnValues);
+  }
+  <RIGHT_PAREN>
+  <WHERE> tk = <IDENTIFIER> <EQ> value = <STRING_LITERAL>
+  {
+    insert.setRowKeyName(tk.image);
+    tmp = value.image;
+    insert.setRowKey(tmp.substring( 1, tmp.length() -1));
+  }
+  { 
+    return insert;
+  }
+}
+
+List<String[]> columnValues():
+{
+  List<String[]> list = new ArrayList<String[]>();
+  String[] columnValue;
+}
+{
+  columnValue = columnValue()
+  {
+    list.add(columnValue);
+  }
+  [
+    <COMMA>
+    columnValue = columnValue()
+    {
+      list.add(columnValue);
+    }
+    (
+      <COMMA>
+      columnValue = columnValue()
+      {
+        list.add(columnValue);
+      }    
+    )*
+  ]
+  {
+    return list;
+  }
+}
+
+String[] columnValue(): 
+{
+  Token tk;
+  String tmp;
+  String[] columnValue = new String[2];
+}
+{
+  <LEFT_PAREN>
+  tk = <STRING_LITERAL> 
+  {
+    tmp = tk.image;
+    columnValue[0] = tmp.substring( 1, tmp.length( ) -1);
+  }
+  <COMMA> 
+  tk = <STRING_LITERAL> 
+  {
+    tmp = tk.image;
+    columnValue[1] = tmp.substring( 1, tmp.length( ) -1);
+  }
+  <RIGHT_PAREN>
+  {
+    return columnValue;
+  }
+}   
+
+DeleteStatement delete( ):
+{
+  Token tk;
+  String tmp;
+  DeleteStatement delete = new DeleteStatement();
+  List<ColumnElement> columns;
+  WhereExpression where;  
+}
+{
+  <DELETE> 
+  columns = selectCols() 
+  {
+    delete.setColumns(columns);
+  }   
+  <FROM> tk = <IDENTIFIER> 
+  {
+    delete.setTableName(tk.image);
+  }
+  where = where()  
+  { 
+    delete.setWhere(where);
+    return delete;
+  } 
+}
+
+//select::= <SELECT> (ColumnElement)* <FROM> (FromElement)* <WHERE> (WhereExpression)
+private SelectStatement select():
+{ 
+  SelectStatement select = new SelectStatement();
+  List<ColumnElement> columns;
+  List<FromElement> tables;
+  WhereExpression where;
+}
+{
+  <SELECT> 
+  columns = selectCols() 
+  { 
+    select.setSelectColumns(columns); 
+  } 
+  <FROM>
+  tables = tableList() 
+  {
+    select.setFromTables(tables);
+  }
+  [
+    where = where()
+    {
+        select.setWhere(where);
+    }
+  ]
+  { 
+    return select; 
+  }  
+}
+
+//Where::= <WHERE> OrExpression
+private WhereExpression where():
+{
+  WhereExpression where;
+}
+{
+  <WHERE>
+  where = orExpression()
+  {
+    return where;
+  }
+}
+
+//OrExpression::= AndExpression ( <OR> AndExpression )*
+private WhereExpression orExpression():
+{
+  WhereExpression where = new WhereExpression();
+  List<WhereExpressionElement> elements = new ArrayList<WhereExpressionElement>();
+}
+{
+  elements = andExpression( ) 
+  {
+    where.addElements(elements);
+  }
+  ( 
+    <OR> 
+    {
+      Operator op = new Operator(Operator.OPERATOR.OR);
+      where.addElement(op);
+    }
+    elements = andExpression( ) 
+    {
+      where.addElements(elements);
+    }
+  )*
+
+  {
+    return where;
+  }
+}
+
+//AndExpression::= CompareExpression ( <AND> CompareExpression )*
+private List<WhereExpressionElement> andExpression():
+{
+  List<WhereExpressionElement> elements = new ArrayList<WhereExpressionElement>();
+  WhereExpressionElement element;
+}
+{
+  element = compareExpression() 
+  {
+    elements.add(element);
+  }
+  ( 
+    <AND> 
+    {
+      Operator op = new Operator(Operator.OPERATOR.AND);
+      elements.add(op);
+    }
+    element = compareExpression() 
+    {
+      elements.add(element);
+    }
+  )*
+
+  {
+    return elements;
+  } 
+}
+
+//CompareExpression::= SumExpression CompareExpressionRight  
+//더 복잡하지만 일단은 단순화 시켰음. 향후 복잡한 query도 지원 가능하도록 변경 필요
+//CompareExpressionRight::= (LikeExpression | InExpression | BetweenExpression | BoolExpression) 
+private WhereExpressionElement compareExpression():
+{
+  SingleColumnElement columnElement = new SingleColumnElement();
+  WhereExpressionElement compareExpression; 
+  Token token;
+}
+{
+  token = <IDENTIFIER>
+  {
+    columnElement.setColumnName(token.image);
+  }
+  (
+      compareExpression = likeExpression(columnElement)
+    | compareExpression = boolExpression(columnElement)
+    | compareExpression = betweenExpression(columnElement)
+  )
+  {
+    return compareExpression;
+  }  
+}
+
+private WhereExpressionElement likeExpression(SingleColumnElement columnElement):
+{
+  LikeExpression likeExpression = new LikeExpression();
+  StringLiteral value = new StringLiteral();
+  Token token;
+}
+{
+  <LIKE>
+  token = <STRING_LITERAL>
+  {
+    value.setValue(token.image);
+  }
+  {
+    likeExpression.setColumn(columnElement);
+    likeExpression.setValue(value);
+    return likeExpression;
+  }
+}
+
+//BoolExpression::= ( ("=" | ">" | ">=" | "<" | "<=") SumExpression)
+private WhereExpressionElement boolExpression(SingleColumnElement columnElement):
+{
+  BoolExpression boolExpression = new BoolExpression();
+  StringLiteral value = new StringLiteral();
+  Token token = null;
+}
+{
+  (token = <EQ> | <GT> | <GT_EQ> | <LT> | <LT_EQ>)
+  {
+    boolExpression.setOperator(token.image);
+  }
+  (
+    token = <STRING_LITERAL>
+    {
+      value.setValue(token.image);
+    }
+  )
+  {
+    boolExpression.setColumn(columnElement);
+    boolExpression.setValue(value);
+    return boolExpression;
+  }
+}
+
+private WhereExpressionElement betweenExpression(SingleColumnElement columnElement):
+{
+  BetweenExpression betweenExpression = new BetweenExpression();
+  StringLiteral fromValue = new StringLiteral();
+  StringLiteral toValue = new StringLiteral();
+  
+  Token token;
+}
+{
+  [
+    <DOT> <TIMESTAMP>
+    {
+      columnElement.setTimestamp(true);
+    }
+  ]
+  <BETWEEN>
+  token = <STRING_LITERAL>
+  {
+    fromValue.setValue(token.image);
+  }
+  <AND>
+  token = <STRING_LITERAL>
+  {
+    toValue.setValue(token.image);
+  }
+  {
+    betweenExpression.setColumn(columnElement);
+    betweenExpression.setFromValue(fromValue);
+    betweenExpression.setToValue(toValue);
+    return betweenExpression;
+  }
+}
+
+//ColumnElement::= ( "*" | SelectList )
+private List<ColumnElement> selectCols(): 
+{
+  List<ColumnElement> columns;
+}
+{
+  (
+    <STAR> 
+    { 
+      columns = new ArrayList<ColumnElement>();
+      columns.add(new AllColumnElement()); 
+      return columns;
+    }
+  )
+  |
+  (  
+    columns = selectList()
+    {
+      return columns;
+    } 
+  )
+}
+
+//SelectList::= ( SelectExpr ( "," SelectExpr)* )
+private List<ColumnElement> selectList():
+{
+  List<ColumnElement> columns = new ArrayList<ColumnElement>();
+  ColumnElement element;
+}
+{
+  element = selectExpr() { columns.add(element); }
+  ( 
+    <COMMA> 
+    element = selectExpr() { columns.add(element); }
+  )*   
+  {
+    return columns;
+  }
+}
+
+//SelectExpr::=SingleColumnElement | Expression
+private ColumnElement selectExpr():
+{
+  ColumnElement element;
+}
+{
+  element = singleColumnElement()
+  {
+    return element;
+  }
+}
+
+//SingleColumneElement::= ( IDENTIFIER | STRING_LITERAL )
+private ColumnElement singleColumnElement():
+{
+  SingleColumnElement columnElement = new SingleColumnElement();
+  Token token;
+  boolean timestamp = false;  
+}
+{
+  token = <IDENTIFIER>
+  {
+    columnElement.setColumnName(token.image);
+  }
+  [
+    <DOT> <TIMESTAMP>
+    {
+      columnElement.setTimestamp(true);
+    }
+  ]  
+  {
+    return columnElement;
+  }
+}
+
+private List<FromElement> tableList():
+{
+  List<FromElement> from = new ArrayList<FromElement>();
+  FromElement element;
+  Token token;
+}
+{
+  element = fromElement() { from.add(element); }
+  (
+    <COMMA>
+    element = fromElement() { from.add(element); }
+  ) *
+  
+  {
+    return from;
+  }
+}
+
+private FromElement fromElement():
+{
+  FromElement fromElement = new FromElement();
+  Token token;
+  SelectStatement selectStmt;
+}
+{
+  ( 
+    token = <IDENTIFIER>
+    { 
+      fromElement.setTableName(token.image); 
+      return fromElement; 
+    }
+  ) 
+  | 
+  ( 
+    <LEFT_PAREN> selectStmt = select() <RIGHT_PAREN>
+    {
+      fromElement.setSubquery(selectStmt);
+      return fromElement;
+    } 
+  )
+}

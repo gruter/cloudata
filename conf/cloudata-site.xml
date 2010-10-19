@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>cloudata.root</name>
+    <value>/user/cloudata</value>
+    <description>root path for data file in DFS(Hadoop)</description>
+  </property>
+  
+  <property>
+    <name>cloudata.local.temp</name>
+    <!--<value>/home/cloudata/tmp</value>-->
+    <value>/home/cloudata/tmp</value>
+    <description>A base for other temporary directories.</description>
+  </property>
+  
+  <property>
+    <name>commitlog.data.dir</name>
+    <value>/home/cloudata/commitlog</value>
+    <description>path where commit logs are stored.</description>
+  </property>
+  
+  <property>
+    <name>cloudata.cluster.zkservers</name>
+    <value>127.0.0.1:2181</value>
+    <description>comma separator</description>
+  </property>
+
+  <property>
+    <name>commitlog.num.replicas</name>
+    <value>2/value>
+    <description>commitlog.num.replicas</description>
+  </property>
+ 
+  <property>
+    <name>cloudata.cluster.zk.sessionTime</name>
+    <value>30000</value>
+    <description>ms</description>
+  </property>  
+</configuration>	

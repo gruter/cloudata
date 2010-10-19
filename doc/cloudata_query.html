@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><title>cloudata</title>
+
+<style type="text/css" media="all">
+@import url("css/maven-base.css");
+@import url("css/maven-theme.css");
+@import url("css/site.css");
+</style>
+<link rel="stylesheet" href="css/print.css" type="text/css" media="print" />
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+<link rel="SHORTCUT ICON" href="favicon.ico" /></head>
+<body class="composite">
+<div id="banner">
+<br />
+<a href="http://www.cloudata.org"><img alt="cloudata_logo" src="images/cloudata.gif" /></a><br />
+</div>
+<div id="breadcrumbs">
+<div class="xleft"></div>
+<div class="xright"> </div>
+<div class="clear">
+<hr /> </div>
+</div>
+<div id="leftColumn">
+  <div id="navcolumn">
+    <h5>About</h5>
+      <ul>
+        <li class="none"><a href="index.html">Overview</a></li>
+        <li class="none"><a href="news.html">News</a></li>
+        <li class="none"><a href="download.html">Downloads</a></li>
+        <li class="none"><a href="faq.html">FAQ</a></li>
+        <li class="none"><a href="license.html">License</a></li>
+      </ul>
+    <h5>Documentation</h5>
+      <ul>
+        <li class="none"><a href="getting_start.html">Getting started</a></li>
+        <li class="none"><a href="install.html">Installation</a></li>
+        <li class="none"><a href="simple_examples.html">Simple Examples</a></li>
+        <li class="none"><a href="mapreduce.html">MapReduce Example</a></li>
+        <li class="none"><a href="datamodel.html">Data model</a></li>
+        <li class="none"><a href="components.html">Components</a></li>
+        <li class="none"><a href="javadoc/index.html">API</a></li>
+        <li class="none"><strong>Query</strong></li>
+        <li class="none"><a href="performance.html">Performance</a></li>
+      </ul>
+    <h5>See also</h5>
+      <ul>
+        <li class="none"><a target="_blank" href="http://labs.google.com/papers/bigtable-osdi06.pdf">Google Bigtable</a></li>
+        <li class="none"><a target="_blank" href="http://hadoop.apache.org">Apache Hadoop</a></li>
+      </ul>
+  </div>
+</div>
+<div id="bodyColumn">
+<div id="contentBox">
+  <h2>Cloudata Query Language</h2>
+  <div class="section">
+    CQL(Cloudata Query Language) is simple query language. You can run query with cloudata shell or cloudata jdbc driver.
+    <h3>create table</h3>
+    <div class="source"><pre>
+CREATE TABLE &lt;table_name&gt; &lt;col1 [, col2, ...]&gt; [VERSION = &lt;number of version&gt;] [comment = &lt;comment&gt;]</pre>
+    </div>
+    <ul>
+      <li>example: CREATE TABLE t_test (col1, col2) version=3 comment='this is test table'</li>
+    </ul>
+    
+    <h3>drop table</h3>
+    <div class="source"><pre>
+DROP TABLE &lt;table_name&gt;</pre>
+    </div>
+    <ul>
+      <li>example: DROP TABLE t_test</li>
+    </ul>
+    
+    <h3>insert</h3>
+    <div class="source"><pre>
+INSERT 
+  INTO &lt;table_name&gt; [(column_name1, column_name2, ...)]
+VALUES ( ('key1', 'val1')[, ('key1', 'val1'), ...]) 
+ WHERE rowkey='row_key'</pre>
+    </div>
+    <ul>
+      <li>example: INSERT INTO t_test VALUES ( ('c1k1', 'v11') , ('c2k2', 'v12') ) where rowkey = 'rk1'</li>
+    </ul>   
+    
+    <h3>select</h3>
+    <div class="source"><pre>
+SELECT &lt;*|colum_name1, ...&gt; 
+  FROM &lt;table_name&gt;
+ WHERE rowkey = '&lt;row_key&gt;'
+   AND column_name1 = '&lt;column_key&gt;'
+   AND column_name1.timestamp between 'start(yyyyMMddHHmmss)' and 'end(yyyyMMddHHmmss)'</pre>
+    </div>
+    <ul>
+      <li>select all rows in table: SELECT col1, col2 FROM t_test</li>
+      <li>select a single row: SELECT col1, col2 FROM t_test where rowkey = 'rk1'</li>
+      <li>like: SELECT ol1, col2 FROM t_test where rowkey like 'rk'</li>
+      <li>between: SELECT ol1, col2 FROM t_test where rowkey between 'rk1' and 'and rk100'</li>
+      <li>select with timestamp: SELECT col1 FROM t_test where rowkey = 'rk1' and col1.timestamp between '20070101000000' and '20071231000000'</li>
+    </ul>      
+    
+    <h3>delete</h3>
+    <div class="source"><pre>
+DELETE * | ( (column_name1 [, column_name2, ...] ) 
+  FROM &lt;table_name&gt;
+ WHERE rowkey='row_key' [and column_name1 = 'column_key' and ...]</pre>
+    </div>
+    <ul>
+      <li>example: DELETE col1 FROM t_test WHERE rowkey = 'rk1' and col1 = 'c1k1'</li>
+    </ul>     
+  </div>
+</div>
+</div>
+<div class="clear">
+<hr /> </div>
+<div id="footer">
+  <div class="xright">Sponsored by <a target="_blank" href="http://www.gruter.com/">Gruter</a></div>
+</div>
+<script type="text/javascript"> 
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script> 
+<script type="text/javascript"> 
+var pageTracker = _gat._getTracker("UA-873630-2");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script> 
+</body></html>

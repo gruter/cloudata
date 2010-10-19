@@ -1,0 +1,6 @@
+In addition, this product includes software developed by:
+
+Hadoop(http://hadoop.apache.org)
+ZooKeeper(http://hadoop.apache.org/zookeeper)
+JUnit (http://www.junit.org/)
+Apache Commons

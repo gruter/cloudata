@@ -1,0 +1,424 @@
+<?xml version="1.0"?>
+<configuration>
+  <property>
+    <name>cloudata.cluster.name</name>
+    <value>cloudata</value>
+    <description>unique name on zookeeper</description>
+  </property>
+
+  <property>
+    <name>cloudata.cluster.zkservers</name>
+    <value>127.0.0.1:2181</value>
+    <description>comma separator</description>
+  </property>
+
+  <property>
+    <name>cloudata.cluster.zk.sessionTime</name>
+    <value>30000</value>
+    <description>ms</description>
+  </property>
+
+  <property>
+    <name>cloudata.filesystem</name>
+    <value>hadoop</value>
+    <description>local, hadoop</description>
+  </property>
+
+  <property>
+    <name>cloudata.root</name>
+    <value>/user/cloudata</value>
+    <description>root path for data file in DFS(Hadoop)</description>
+  </property>
+
+  <property>
+    <name>cloudata.local.temp</name>
+    <value>/home/cloudata/tmp/cloudata-${user.name}</value>
+    <description>A base for other temporary directories.</description>
+  </property>
+
+  <!-- master server configuration -->
+  <property>
+    <name>masterServer.port</name>
+    <value>7000</value>
+    <description>master server TCP port</description>
+  </property>
+
+  <property>
+    <name>masterServer.handler.count</name>
+    <value>10</value>
+    <description>The number of thread handling RPC requests to CloudataMaster</description>
+  </property>
+  
+  <property>
+    <name>masterServer.info.address</name>
+    <value>0.0.0.0:57000</value>
+    <description>Info Web Server Address</description>
+  </property>
+  
+  <!-- end of master server configuration -->
+
+  <!-- tablet server configuration -->
+  <property>
+    <name>tabletServer.port</name>
+    <value>7001</value>
+    <description>TCP port for tablet server to receive RPC requests</description>
+  </property>
+
+  <property>
+    <name>tabletServer.scanner.port</name>
+    <value>50100</value>
+    <description>TCP port for client scanner to connect</description>
+  </property>
+
+  <property>
+    <name>maxTabletSize</name>
+    <value>200</value>
+    <description>MB, if tablet is bigger than this, tablet will be splited</description>
+  </property>
+        
+  <property>
+    <name>memory.maxTabletSize</name>
+    <value>400</value>
+    <description>MB, if TabletServer's total MemoeySSTable size bigger than this, all tablets do minor compaction</description>
+  </property>
+	
+  <property>
+    <name>memory.maxTabletSizePerTablet</name>
+    <value>20</value>
+    <description>MB, max memory per tablet. If tablet memory bigger than this, do minor compaction</description>
+  </property>
+	
+  <property>
+    <name>memory.maxFreeMemoryRate</name>
+    <value>0.2</value>
+    <description>%, if TabletServer's free memory under this * maxHeap, all tablets do minor compaction</description>
+  </property>        
+	
+	<property>
+    <name>memory.maxColumnCacheCapacity</name>
+    <value>200</value>
+    <description>MB, TabletServer's column cache memory capacity</description>
+  </property> 
+  
+  <property>
+    <name>tabletServer.handler.count</name>
+    <value>10</value>
+    <description>The number of thread handling RPC requests to TabletServer</description>
+  </property>
+
+  <property>
+    <name>tabletServer.max.tablet.count</name>
+    <value>5000</value>
+    <description>Maximum number of tablets per a TabletServer</description>
+  </property>
+	
+  <property>
+    <name>tabletServer.tx.statistics.interval</name>
+    <value>10</value>
+    <description>The interval of collecting tx statistics. Min</description>
+  </property>	
+	
+  <property>
+    <name>tabletServer.maxMinorCompactionThread</name>
+    <value>10</value>
+    <description>How many minor compaction threads is allowed to run concurrently in a TabletServer</description>
+  </property>
+  	
+  <property>
+    <name>tabletServer.maxMajorCompactionThread</name>
+    <value>5</value>
+    <description>How many major compaction threads is allowed to run concurrently in a TabletServer</description>
+  </property> 
+	
+  <property>
+    <name>tabletServer.maxSplitThread</name>
+    <value>5</value>
+    <description>How many split threads is allowed to run concurrently in a TabletServer</description>
+  </property> 
+
+  <property>
+    <name>tabletServer.minMemory</name>
+    <value>200</value>
+    <description>
+    	MB, If TabletServer's memory is lower than this value, All put operation skiped.
+    </description>
+  </property>   
+
+  <property>
+    <name>tabletServer.put.heavyMemoryAcceptRate</name>
+    <value>0.2</value>
+    <description>
+    	%, If TabletServer uses too many memory, TabletServer accepts put request this rate.
+    	client(NTable) API retry automatically.
+    </description>
+  </property>   
+
+  <property>
+    <name>tabletServer.put.tabletDistributionModeAcceptRate</name>
+    <value>0.5</value>
+    <description>
+    	%, If TabletServer has only one tablet, TabletServer accepts put request this rate.
+    	client(NTable) API retry automatically.
+    </description>
+  </property>  
+  
+  <property>
+    <name>tabletServer.put.splitingAcceptRate</name>
+    <value>0.5</value>
+    <description>
+    	%, If Tablet spliting, TabletServer accepts put request this rate.
+    	client(NTable) API retry automatically.
+    </description>
+  </property>  
+  
+  <property>
+    <name>tabletServer.heavyMemoryPutSleep</name>
+    <value>200</value>
+    <description>
+    	ms, If TabletServer uses too many memory, client(NTable) API calls next put after this sleep time. 
+    </description>
+  </property>   
+
+  <property>
+    <name>tabletServer.tabletDistributionModePutSleep</name>
+    <value>200</value>
+    <description>
+    	ms, If TabletServer has only one tablet, client(NTable) API calls next put after this sleep time. 
+    </description>
+  </property>   
+
+  <property>
+    <name>tabletServer.tabletSplitPutSleep</name>
+    <value>50</value>
+    <description>
+    	ms, If Tablet spliting, client(NTable) API calls next put after this sleep time. 
+    </description>
+  </property>       
+    
+  <property>
+    <name>cloudatamaster.iolock.ratio</name>
+    <value>2</value>
+    <description>IOLock is to regulate the number of total split and major compaction 
+                 concurrently running in Cloudata cluster. Basically, each TabletServer
+				 who want to execute split or major compaction should acquire iolock, and
+				 the number of acquired iolock becomes available number of concurrently executing 
+                 split or major compaction in a TabletServer. The number of total iolocks 
+                 in a Cloudata cluster is decided by the number of TabletServers * iolock.ratio.
+                 As the value grows, data partitioning gets faster and read performance gets higher,
+                 but it gives higher overhead to underlying network and filesystem,
+                 causing performance degradation. The ratio should be equal to or greather than 1.</description>
+  </property>
+
+  <property>
+    <name>split.majorcompaction.ratio</name>
+    <value>0.5</value>
+    <description>This value decides that how many acquired iolocks are spent to split.
+                 For example, if the number of acquired iolocks are 5 and the ratio is 0.6, 
+                 TabletServer is allowed to execute 3(= 5*0.6) split threads 
+                 and 2 major compactions concurrently. The value should be assigned between 
+                 0.1 and 0.9</description>
+  </property>
+  	
+  <!-- end of tablet server configuration -->
+
+  <!-- uploader -->
+  <property>
+    <name>uploader.memory.buffer</name>
+    <value>100</value>
+    <description>buffer size for uploader, MB</description>
+  </property>				
+  <!-- end of uploader -->
+				
+  <!-- Client -->				
+  <property>
+    <name>client.tx.timeout</name>
+    <value>180</value>
+    <description>sec, client tx, commit, get timeout</description>
+  </property>
+	
+  <property>
+    <name>tx.retry.sleeptime.msec</name>
+    <value>100</value>
+    <description>ms, If put or get operation fail, client retry after this time. </description>
+  </property>
+	
+  <property>
+    <name>scanner.expire.time</name>
+    <value>30</value>
+    <description>sec, scanner's next() call timeout interval</description>
+  </property>
+	
+  <property>
+    <name>ipc.client.connect.max.retries</name>
+    <value>5</value>
+    <description>How many times Cloudata client try to connect 
+                 when establishing connection to TabletServer</description>
+  </property>
+
+  <property>
+    <name>ipc.client.timeout</name>
+    <value>10000</value>
+    <description>ms.</description>
+  </property>
+
+  <property>
+    <name>ipc.client.connect.max.connection</name>
+    <value>50</value>
+    <description>Cloudata client has a kind of cache to reuse TCP connections to TabletServer.
+                 This value is the size of cache.</description>
+  </property>
+
+  <property>
+    <name>client.max.resultRecord</name>
+    <value>5000</value>
+    <description>Maxium number of result record</description>
+  </property>
+
+  <property>
+    <name>client.min.numOfChars.like</name>
+    <value>4</value>
+    <description>Min number of chars for like operation</description>
+  </property>
+  <!-- end of Client -->				
+
+  <!-- commitlog configuration -->
+  <property>
+    <name>cloudata.commitlog.filesystem</name>
+    <value>pipe</value>
+    <description>pipe, file, local, db</description>
+  </property>
+	
+  <property>
+    <name>cloudata.commitlog.server.port</name>
+    <value>57001</value>
+    <description>TCP socket port number for incomming rpc</description>
+  </property>           
+	
+  <property>
+    <name>commitlog.num.replicas</name>
+    <value>2</value>
+    <description>commitlog.num.replicas</description>
+  </property>
+  
+  <property>
+    <name>commitlog.data.dir</name>
+    <value>$USER_HOME$/commitlog/</value>
+    <description>path where commit logs are stored.</description>
+    <!--  $USER_HOME$ means user's home directory -->
+  </property>            
+	
+  <property>
+    <name>commitlog.data.diskUsage</name>
+    <value>0.8f</value>
+    <description>When calculating remaining space, only use this percentage of the real available space
+    </description>
+  </property>   
+
+  <property>
+    <name>commitlog.image.dir</name>
+    <value>/user/cloudata/commitlog/image</value>
+    <description>The path (DFS) where the mapping information 
+                 between commitlog servers and tabletservers is stored</description>
+  </property>   	
+
+  <property>
+    <name>commitLogServer.pipe.port</name>
+    <value>18000</value>
+    <description>TCP port for receiving commitlogs</description>
+  </property>
+	
+  <property>
+    <name>commitLogServer.pipe.timeout</name>
+    <value>10</value>
+    <description>pipe timeout. second</description>
+  </property>
+
+  <property>
+    <name>commitLogClient.max.pipe.poolsize</name>
+    <value>2000</value>
+    <descriptor> the number of available pipes for a TabletServer to open</descriptor> 
+  </property>
+
+  <property>
+    <name>commitLogServer.pipe.poolExpiration</name>
+    <value>5</value>
+    <descriptor>sec, pool clear time</descriptor> 
+  </property>
+  
+  <property>
+    <name>commitlog.num.replicas</name>
+    <value>2</value>
+    <descriptor></descriptor> 
+  </property>  
+
+  <property>
+    <name>commitlog.num.test.replicas</name>
+    <value>false</value>
+    <descriptor></descriptor> 
+  </property>  
+  
+  <property>
+    <name>commitLogServer.Selection.Strategy</name>
+    <value>random</value>
+    <descriptor>random, sequence</descriptor> 
+  </property>  
+
+  <property>
+    <name>commitLogServer.locality</name>
+    <value>true</value>
+    <descriptor>true/false</descriptor> 
+  </property>        
+  
+  <property>
+    <name>commitLogServer.systemMetrics.on</name>
+    <value>false</value>
+    <descriptor>true/false, If TabletServer and CommitLogServer run on different machine, set true</descriptor> 
+  </property> 
+  <!-- end of commitlog configuration -->
+	
+	<!-- blob -->
+	<property>
+	 <name>blob.maxFileLength</name>
+	 <value>64</value>
+	 <descriptor>MB, max a data file's length</descriptor> 
+  </property>
+
+  <property>
+   <name>blob.gcRate</name>
+   <value>0.3</value>
+   <descriptor>Garbage collection rate</descriptor> 
+  </property>  
+	<!-- blob -->
+	
+	<!-- thrift -->
+  <property>
+    <name>thrift.server.port</name>
+    <value>7002</value>
+    <description>thrift server TCP port</description>
+  </property>
+	<!-- thrift -->
+	
+  <!-- rest -->
+  <property>
+    <name>rest.server.port</name>
+    <value>7003</value>
+    <description>REST server HTTP port</description>
+  </property>
+  <property>
+    <name>rest.server.http.threads</name>
+    <value>100</value>
+    <description></description>
+  </property>
+  <property>
+    <name>rest.server.hosts</name>
+    <value>host1,host2</value>
+    <description>comma separator</description>
+  </property>    
+  <!-- rest -->
+
+  <property>
+    <name>CloudataFS.webserver.port</name>
+    <value>7004</value>
+    <description>CloudataFS Web server HTTP port</description>
+  </property>
+</configuration>	

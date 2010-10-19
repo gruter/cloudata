@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svn/neptune/!svn/ver/600/core/trunk/doc/css
+END
+print.css
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/neptune/!svn/ver/600/core/trunk/doc/css/print.css
+END
+maven-base.css
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/neptune/!svn/ver/600/core/trunk/doc/css/maven-base.css
+END
+maven-theme.css
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/neptune/!svn/ver/600/core/trunk/doc/css/maven-theme.css
+END
