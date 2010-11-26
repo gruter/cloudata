@@ -297,7 +297,6 @@ public class MemorySSTable {
         for (CommitLog commitLog : commitLogList) {
           commitLogFileSystem.addCommitLog(tabletName, txIdStr, commitLogSeq, commitLog);
         }
-        commitLogFileSystem.finishAdding(tabletName, txIdStr);
         commitLogSeq++;
       } catch (CommitLogInterruptedException e) {
         throw e;
@@ -305,6 +304,9 @@ public class MemorySSTable {
         LOG.error("Commit Log Error in tablet [" + tabletInfo.getTabletName() + "], txid ["
             + txId + "], exception : " + e);
         throw new CommitLogException(e);
+      } finally {
+        //changeLogFileSystem.returnToCache(tabletName);
+        commitLogFileSystem.finishAdding(tabletName, txIdStr);
       }
     }
     

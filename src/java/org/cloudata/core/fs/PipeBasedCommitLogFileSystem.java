@@ -382,12 +382,12 @@ public class PipeBasedCommitLogFileSystem implements CommitLogFileSystemIF {
       fs.commitWriting();
       fs.touch();
 
-      returnToCache(tabletName, fs);
+      //returnToCache(tabletName, fs);
     } catch (CommitLogInterruptedException e) {
-      returnToCache(tabletName, fs);
+      //returnToCache(tabletName, fs);
       throw e;
     } finally {
-      //watch.stopAndReportIfExceed(LOG);
+      returnToCache(tabletName, fs);
       fsThreadLocal.set(null);
     }
   }
