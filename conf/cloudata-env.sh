@@ -11,10 +11,10 @@ export JAVA_HOME=/usr/java/jdk1.6.0_06
 #Cloudata home dir
 export CLOUDATA_HOME=/home/cloudata
 
-#Neptune conf dis
+#Cloudata conf dis
 export CLOUDATA_CONF_DIR="${CLOUDATA_HOME}/conf"
 
-# JVM Heap Size (MB) of each Neptune component
+# JVM Heap Size (MB) of each Cloudata component
 #export CLOUDATA_MASTER_HEAPSIZE=`heapsize 512 1024`
 #export CLOUDATA_TABLETSERVER_HEAPSIZE=`heapsize 2048 2048`
 #export CLOUDATA_COMMITLOGSERVER_HEAPSIZE=`heapsize 512 512`
@@ -45,7 +45,7 @@ export HADOOP_HOME=/home/hadoop
 # Hadoop Conf dir
 export HADOOP_CONF_DIR="${HADOOP_HOME}/conf"
 
-# JVM Options of each Neptune component
+# JVM Options of each Cloudata component
 export CLOUDATA_MASTERNODE_OPTS="$CLOUDATA_MASTER_HEAPSIZE -Dcom.sun.management.jmxremote"
 export CLOUDATA_TABLETSERVER_OPTS="-XX:+UseConcMarkSweepGC -XX:+ExplicitGCInvokesConcurrent -XX:+CMSClassUnloadingEnabled -XX:CMSInitiatingOccupancyFraction=50 -server -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=$TABLETSERVER_JMX_PORT $CLOUDATA_TABLETSERVER_HEAPSIZE"
 export CLOUDATA_COMMITLOG_OPTS="-XX:+UseConcMarkSweepGC -XX:+ExplicitGCInvokesConcurrent -XX:+CMSClassUnloadingEnabled -XX:CMSInitiatingOccupancyFraction=50 -server $CLOUDATA_COMMITLOGSERVER_HEAPSIZE"
